@@ -1,6 +1,5 @@
 package com.example.project.utilities;
 
-import com.example.project.models.ErrorResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +47,9 @@ public class GlobalExceptionHandler {
         ));
     }
 
+
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorResponseDto> handleNoSuchElementException(Exception e){
+    public ResponseEntity<ErrorResponseDto> handleNoSuchElementException(NoSuchElementException e){
         log.error("Handle no such element exception", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(
                 "No such element", e.getMessage(), LocalDateTime.now()
@@ -65,5 +65,9 @@ public class GlobalExceptionHandler {
     }
 
 
-
+    public static record ErrorResponseDto(
+        String message,
+        String detailedMessage,
+        LocalDateTime errorTime
+    ) {}
 }

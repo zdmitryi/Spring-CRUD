@@ -18,39 +18,36 @@ public class TaskEntity {
     public Long getId() {
         return id;
     }
-    @Column(name = "creature_id")
-    Long creatureId;
+    @Column(name = "name")
+    String name;
     @Column(name = "doneDateTime")
     LocalDateTime doneDateTime;
     @Column(name = "assigned_user_id")
     Long assignedUserId;
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    Status status;
-    @Column(name = "create_data_time")
-    LocalDateTime createDateTime;
+    Task.Status status;
+    @Column(name = "start_data_time")
+    LocalDateTime startDateTime;
     @Column(name = "deadline_data")
     LocalDateTime deadlineDate;
     @Enumerated(EnumType.STRING)
     @Column(name = "priority")
-    Priority priority;
+    Task.Priority priority;
 
 
     public TaskEntity(){}
 
-    public TaskEntity(Long id, Long creatureId, Long assignedUserId, Status status, LocalDateTime createDateTime, LocalDateTime deadlineDate, Priority priority){
+    public TaskEntity(Long id, String name, Long assignedUserId, Task.Status status, LocalDateTime startDateTime, LocalDateTime deadlineDate, Task.Priority priority){
         this.id = id;
-        this.creatureId = creatureId;
+        this.name = name;
         this.status = status;
-        this.createDateTime = createDateTime;
+        this.startDateTime = startDateTime;
         this.deadlineDate = deadlineDate;
         this.priority = priority;
         this.assignedUserId = assignedUserId;
     }
 
-    public void setCreatureId(Long id) {
-        this.creatureId = id;
-    }
 
     public LocalDateTime getDoneDateTime() {
         return doneDateTime;
@@ -60,16 +57,20 @@ public class TaskEntity {
         this.doneDateTime = doneDateTime;
     }
 
-    public Long getCreatureId() {
-        return creatureId;
+    public void setName(String name){
+        this.name = name;
     }
 
-    public LocalDateTime getCreateDateTime() {
-        return createDateTime;
+    public String getName(){
+        return name;
     }
 
-    public void setCreateDateTime(LocalDateTime createDateTime) {
-        this.createDateTime = createDateTime;
+    public LocalDateTime getStartDateTime() {
+        return startDateTime;
+    }
+
+    public void setStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
     }
 
     public Long getAssignedUserId() {
@@ -80,11 +81,11 @@ public class TaskEntity {
         this.assignedUserId = assignedUserId;
     }
 
-    public Status getStatus() {
+    public Task.Status getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(Task.Status status) {
         this.status = status;
     }
 
@@ -96,11 +97,11 @@ public class TaskEntity {
         this.deadlineDate = deadlineDate;
     }
 
-    public Priority getPriority() {
+    public Task.Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(Priority priority) {
+    public void setPriority(Task.Priority priority) {
         this.priority = priority;
     }
 }

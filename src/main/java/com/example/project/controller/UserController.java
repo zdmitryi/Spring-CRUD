@@ -1,6 +1,6 @@
 package com.example.project.controller;
 
-import com.example.project.models.User;
+import com.example.project.models.WebUser;
 import com.example.project.utilities.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +18,9 @@ public class UserController {
     public UserController(UserService userService) {this.userService = userService;}
     @PostMapping("/register")
     public ResponseEntity<?> register(
-            @RequestBody User user
+            @RequestBody WebUser webUser
     ){
-        log.info("Called register of user:" + user.getLogin());
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(user));
+        log.info("Called register of webUser:" + webUser.getLogin());
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(webUser));
     }
 }

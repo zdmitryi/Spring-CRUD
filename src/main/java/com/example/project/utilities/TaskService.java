@@ -25,15 +25,15 @@ public class TaskService {
     public Task getTaskById(long id){
         return taskMapper.toDomainTask(taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Не существует task с таким id")));
     }
-    public List<Task> getAllFilterTasks(TaskSearchFilter filter){
+    public List<Task> getAllFilterTasks(TaskRepository.TaskSearchFilter filter){
         int pageSize = filter.pageSize() == null? 10 : filter.pageSize();
         int pageNumber = filter.pageNum() == null? 0 : filter.pageNum();
         var pageable = Pageable
                 .ofSize(pageSize)
                 .withPage(pageNumber);
         List<TaskEntity> listOfTaskEntity = taskRepository.findTasksByOptionalParams(
+                filter.name(),
                 filter.assignedUserId(),
-                filter.creatureId(),
                 filter.status(),
                 filter.priority(),
                 pageable
@@ -57,13 +57,14 @@ public class TaskService {
             throw new IllegalArgumentException("Status should be empty");
         }
         TaskEntity taskToSave = taskMapper.toEntity(taskToCreate);
-        taskToSave.setStatus(Status.CREATED);
+        taskToSave.setStatus(Task.Status.CREATED);
         taskToSave.setAssignedUserId(user.getId());
         var saved = taskRepository.save(taskToSave);
         return taskMapper.toDomainTask(saved);
     }
 
     public Task putTaskById(long id, @Valid Task taskToPut, User user){
+        if (!taskToPut.assignedUserId().equals(user.getId()) && !user.isAdmin()) throw new AccessDeniedException("Нет доступа к данной задаче");
 
         if (!isValidTask(taskToPut)) throw new IllegalArgumentException("Дедлайн у Task раньше даты создания");
         var updatedTask = taskRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не существует Task с данным id"));
@@ -71,55 +72,49 @@ public class TaskService {
         if (taskToPut.id() != null){
             throw new IllegalArgumentException("ID should be empty");
         }
-        if (taskToPut.assignedUserId() != null){
-            throw new IllegalArgumentException("AssignedUserId should be empty");
-        }
         if (taskToPut.status() != null){
             throw new IllegalArgumentException("Status should be empty");
         }
-        if (updatedTask.getStatus() == Status.DONE){
+        if (updatedTask.getStatus() == Task.Status.DONE){
             throw new IllegalArgumentException("Task is already done");
         }
         TaskEntity newTaskEntity = taskMapper.toEntity(taskToPut);
-        newTaskEntity.setStatus(Status.REPLACED);
+        newTaskEntity.setStatus(Task.Status.REPLACED);
         var newTask = taskRepository.save(newTaskEntity);
         return taskMapper.toDomainTask(newTask);
     }
 
     public Task deleteTaskById(long id, User user) {
         TaskEntity taskToDelete = taskRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Не существует элемента с таким id"));
-        if (!taskToDelete.getAssignedUserId().equals(user.getId())) throw new AccessDeniedException("Нет доступа к данной задаче");
+        if (!taskToDelete.getAssignedUserId().equals(user.getId()) && !user.isAdmin()) throw new AccessDeniedException("Нет доступа к данной задаче");
         taskRepository.deleteById(id);
         return null;
     }
 
     public Task startTask(long id, User user) throws RuntimeException{
-            Task taskToMakeProgress = taskMapper.toDomainTask(taskRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не существует Task с данным id")));
-            if (taskToMakeProgress.status() == Status.IN_PROGRESS) return null;
-            else if (taskToMakeProgress.assignedUserId() == null) {
-                throw new IllegalStateException("Assigned id не должно быть пустым");
-            }
-            if (!taskToMakeProgress.assignedUserId().equals(user.getId())) throw new AccessDeniedException("Нет доступа к данной задаче");
-            if (taskRepository.findTasksByOptionalParams(taskToMakeProgress.assignedUserId(), null, Status.IN_PROGRESS, null, null).size() > 4) throw new IllegalStateException("Превышено значение выполняемых Task для данного пользователя");
+            Task taskToMakeProgress = taskMapper.toDomainTask(taskRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Не существу1ет Task с данным id")));
+            if (!taskToMakeProgress.assignedUserId().equals(user.getId()) && !user.isAdmin()) throw new AccessDeniedException("Нет доступа к данной задаче");
+            if (taskToMakeProgress.status() == Task.Status.IN_PROGRESS) return null;
+            if (taskRepository.findTasksByOptionalParams(taskToMakeProgress.name(), taskToMakeProgress.assignedUserId(), Task.Status.IN_PROGRESS, null, null).size() > 4) throw new IllegalStateException("Превышено значение выполняемых Task для данного пользователя");
             else {
                 TaskEntity newTaskEntity = taskMapper.toEntity(taskToMakeProgress);
-                newTaskEntity.setStatus(Status.IN_PROGRESS);
+                newTaskEntity.setStatus(Task.Status.IN_PROGRESS);
                 return taskMapper.toDomainTask(taskRepository.save(newTaskEntity));
             }
     }
 
     public Task completeTask(long id, User user) {
         var taskToComplete = taskRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Не существует элемента с таким id"));
-        if (!taskToComplete.getAssignedUserId().equals(user.getId())) throw new AccessDeniedException("Нет доступа к данной задаче");
-        if (taskToComplete.getAssignedUserId() == null) throw new IllegalArgumentException("Assigned User Id не должно быть null");
+        if (!taskToComplete.getAssignedUserId().equals(user.getId()) && !user.isAdmin()) throw new AccessDeniedException("Нет доступа к данной задаче");
+        if (taskToComplete.getAssignedUserId() == null) throw new IllegalArgumentException("Assigned WebUser Id не должно быть null");
         if (taskToComplete.getDeadlineDate() == null) throw new IllegalArgumentException("Deadline data не должна быть null");
 
-        taskToComplete.setStatus(Status.DONE);
+        taskToComplete.setStatus(Task.Status.DONE);
         taskToComplete.setDoneDateTime(LocalDateTime.now());
         return taskMapper.toDomainTask(taskRepository.save(taskToComplete));
     }
 
     public boolean isValidTask(Task task){
-        return task.createDateTime().isBefore(task.deadlineDate());
+        return task.startDateTime().isBefore(task.deadlineDate());
     }
 }

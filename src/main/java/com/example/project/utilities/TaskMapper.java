@@ -13,13 +13,12 @@ public class TaskMapper {
     ){
         return new Task(
                 taskEntity.getId(),
-                taskEntity.getCreatureId(),
+                taskEntity.getName(),
                 taskEntity.getAssignedUserId(),
                 taskEntity.getStatus(),
-                taskEntity.getCreateDateTime(),
+                taskEntity.getStartDateTime(),
                 taskEntity.getDeadlineDate(),
-                taskEntity.getPriority(),
-                LocalDateTime.now()
+                taskEntity.getPriority()
         );
     }
 
@@ -28,10 +27,10 @@ public class TaskMapper {
     ){
         return new TaskEntity(
                 task.id(),
-                task.creatureId(),
+                task.name(),
                 task.assignedUserId(),
                 task.status(),
-                task.createDateTime(),
+                task.startDateTime(),
                 task.deadlineDate(),
                 task.priority()
         );

@@ -7,20 +7,28 @@ import java.time.LocalDateTime;
 public record Task(
         Long id,
         @NotNull
-        Long creatureId,
-
-        Long assignedUserId,
-
-        Status status,
-
+        String name,
         @NotNull
-        LocalDateTime createDateTime,
+        Long assignedUserId,
+        Status status,
+        @NotNull
+        LocalDateTime startDateTime,
         @NotNull
         @Future
         LocalDateTime deadlineDate,
         @NotNull
-        Priority priority,
-        LocalDateTime doneDateTime
+        Priority priority
 ) {
+    public enum Status {
+        CREATED,
+        IN_PROGRESS,
+        DONE,
+        REPLACED
+    }
 
+    public enum Priority {
+        LOW,
+        MEDIUM,
+        HIGH
+    }
 }

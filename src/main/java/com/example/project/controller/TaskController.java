@@ -1,11 +1,10 @@
 package com.example.project.controller;
 
-import com.example.project.models.Priority;
 import com.example.project.models.Task;
-import com.example.project.models.TaskSearchFilter;
 import com.example.project.models.User;
+import com.example.project.models.WebUser;
+import com.example.project.utilities.TaskRepository;
 import com.example.project.utilities.TaskService;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +36,16 @@ public class TaskController {
 
     @GetMapping()
     public ResponseEntity<List<Task>> getAllFilterTasks(
+            @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "creatureId", required = false) Long creatureId,
             @RequestParam(name = "assignedUserId", required = false) Long assignedUserId,
-            @RequestParam(name = "priority", required = false) Priority priority,
+            @RequestParam(name = "priority", required = false) Task.Priority priority,
             @RequestParam(name = "pageSize", required = false) Integer pageSize,
             @RequestParam(name = "pageNumber", required = false) Integer pageNumber
     ){
         log.info("Called getAllFilerTasks");
-        var filter = new TaskSearchFilter(
-                creatureId,
+        var filter = new TaskRepository.TaskSearchFilter(
+                name,
                 assignedUserId,
                 null,
                 priority,
@@ -70,9 +70,9 @@ public class TaskController {
             @PathVariable("id") long id,
             Authentication authentication
     ){
-        User user = (User) authentication.getPrincipal();
+        WebUser webUser = (WebUser) authentication.getPrincipal();
         log.info("Called complete task");
-        return ResponseEntity.status(HttpStatus.OK).body(taskService.completeTask(id, user));
+        return ResponseEntity.status(HttpStatus.OK).body(taskService.completeTask(id, webUser));
     }
 
     @PutMapping("/{id}")
@@ -94,17 +94,17 @@ public class TaskController {
             @PathVariable("id") long id,
             Authentication authentication
     ) {
-        User user = (User) authentication.getPrincipal();
+        WebUser webUser = (WebUser) authentication.getPrincipal();
         log.info("Called DeleteId");
-        return ResponseEntity.status(HttpStatus.OK).body(taskService.deleteTaskById(id, user));
+        return ResponseEntity.status(HttpStatus.OK).body(taskService.deleteTaskById(id, webUser));
     }
     @PutMapping("/{id}/start")
     public ResponseEntity<?> makeTaskProgress(
             @PathVariable("id") long id,
             Authentication authentication
     ) {
-            User user = (User) authentication.getPrincipal();
+            WebUser webUser = (WebUser) authentication.getPrincipal();
             log.info("Called makeTaskProgress, id: " + id);
-            return ResponseEntity.status(HttpStatus.OK).body(taskService.startTask(id, user));
+            return ResponseEntity.status(HttpStatus.OK).body(taskService.startTask(id, webUser));
         }
 }

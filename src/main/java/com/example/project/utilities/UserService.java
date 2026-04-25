@@ -1,7 +1,6 @@
 package com.example.project.utilities;
 
-import com.example.project.models.User;
-import org.jspecify.annotations.Nullable;
+import com.example.project.models.WebUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -24,15 +22,15 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-    public User register(User userToRegister){
-        if (userRepository.existsByUsername(userToRegister.getUsername())) throw new IllegalArgumentException("Пользователь с таким именем уже существует");
-        userToRegister.setPassword(passwordEncoder.encode(userToRegister.getPassword()));
-        if (userToRegister.getRoles() == null || userToRegister.getRoles().isEmpty()){
+    public WebUser register(WebUser webUserToRegister){
+        if (userRepository.existsByUsername(webUserToRegister.getUsername())) throw new IllegalArgumentException("Пользователь с таким именем уже существует");
+        webUserToRegister.setPassword(passwordEncoder.encode(webUserToRegister.getPassword()));
+        if (webUserToRegister.getRoles() == null || webUserToRegister.getRoles().isEmpty()){
             log.info("New user registered");
-            userToRegister.setRoles(Set.of(User.Role.DEFAULT_USER));
-            log.info(userToRegister.getRoles().toString());
+            webUserToRegister.setRoles(Set.of(com.example.project.models.WebUser.Role.DEFAULT_USER));
+            log.info(webUserToRegister.getRoles().toString());
         }
-        return userRepository.save(userToRegister);
+        return userRepository.save(webUserToRegister);
     }
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
