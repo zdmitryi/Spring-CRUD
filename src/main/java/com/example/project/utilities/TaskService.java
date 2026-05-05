@@ -50,7 +50,7 @@ public class TaskService {
         if (taskToCreate.id() != null){
             throw new IllegalArgumentException("ID should be empty");
         }
-        if (taskToCreate.assignedUserId() != null){
+        if (taskToCreate.assignedUserId() != null && user instanceof WebUser){
             throw new IllegalArgumentException("AssignedUserId should be empty");
         }
         if (taskToCreate.status() != null){

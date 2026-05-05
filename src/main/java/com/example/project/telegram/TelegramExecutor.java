@@ -119,12 +119,12 @@ public class TelegramExecutor {
                 bot.sendMessage(chatId, "Введите дату начала (ГГГГ-ММ-ДД):");
             }
             case "patchStartDate" -> {
-                bot.saveData(chatId, "patchedStartDate", data);
+                bot.saveData(chatId, "patchedStartDate", data + "T00:00:00");
                 bot.setPipelineStep(chatId, "patchDeadlineDate");
                 bot.sendMessage(chatId, "Введите дедлайн (ГГГГ-ММ-ДД):");
             }
-            case "patchDeadline" -> {
-                bot.saveData(chatId, "patchedDeadLine", data);
+            case "patchDeadlineDate" -> {
+                bot.saveData(chatId, "patchedDeadLine", data + "T00:00:00");
                 bot.setPipelineStep(chatId, "patchPriority");
                 bot.sendMessage(chatId, "Введите приоритет (LOW/MEDIUM/HIGH):");
             }
@@ -152,6 +152,7 @@ public class TelegramExecutor {
                 Task.Priority.valueOf(priority.toUpperCase())
         );
         TelegramUser user = telegramUserRepository.findById(chatId).orElseThrow(() -> new AccessDeniedException("Неавторизованный пользователь"));
+        taskService.deleteTaskById(taskId, user);
         taskService.putTaskById(taskId, task, user);
         bot.clearPipeline(chatId);
 

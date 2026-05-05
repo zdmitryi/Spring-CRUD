@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,9 +59,8 @@ public class TaskController {
     public ResponseEntity<Task> createTask(
             @RequestBody
             Task taskToCreate,
-            Authentication authentication
+            @AuthenticationPrincipal WebUser user
     ){
-        User user = (User) authentication.getPrincipal();
         log.info("New Task Created");
         return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(taskToCreate, user));
     }
@@ -68,11 +68,10 @@ public class TaskController {
     @PostMapping("/{id}/complete")
     public ResponseEntity<Task> completeTask(
             @PathVariable("id") long id,
-            Authentication authentication
+            @AuthenticationPrincipal WebUser user
     ){
-        WebUser webUser = (WebUser) authentication.getPrincipal();
         log.info("Called complete task");
-        return ResponseEntity.status(HttpStatus.OK).body(taskService.completeTask(id, webUser));
+        return ResponseEntity.status(HttpStatus.OK).body(taskService.completeTask(id, user));
     }
 
     @PutMapping("/{id}")
@@ -80,10 +79,9 @@ public class TaskController {
             @RequestBody
             Task taskToPut,
             @PathVariable("id") long id,
-            Authentication authentication
+            @AuthenticationPrincipal WebUser user
 
     ){
-        User user = (User) authentication.getPrincipal();
         log.info("Called PutId");
         return ResponseEntity.status(HttpStatus.CREATED).body(taskService.putTaskById(id, taskToPut, user));
     }
@@ -92,19 +90,17 @@ public class TaskController {
     public ResponseEntity<?> deleteTaskById(
 
             @PathVariable("id") long id,
-            Authentication authentication
+            @AuthenticationPrincipal WebUser user
     ) {
-        WebUser webUser = (WebUser) authentication.getPrincipal();
         log.info("Called DeleteId");
-        return ResponseEntity.status(HttpStatus.OK).body(taskService.deleteTaskById(id, webUser));
+        return ResponseEntity.status(HttpStatus.OK).body(taskService.deleteTaskById(id, user));
     }
     @PutMapping("/{id}/start")
     public ResponseEntity<?> makeTaskProgress(
             @PathVariable("id") long id,
-            Authentication authentication
+            @AuthenticationPrincipal WebUser user
     ) {
-            WebUser webUser = (WebUser) authentication.getPrincipal();
             log.info("Called makeTaskProgress, id: " + id);
-            return ResponseEntity.status(HttpStatus.OK).body(taskService.startTask(id, webUser));
+            return ResponseEntity.status(HttpStatus.OK).body(taskService.startTask(id, user));
         }
 }

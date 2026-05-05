@@ -24,7 +24,7 @@ public class WebUser implements UserDetails, User {
     @NotNull
     String password;
 
-    public WebUser(String username, String password, String email, Set roles) {
+    public WebUser(String username, String password, Set roles) {
         this.username = username;
         this.password = password;
         this.roles = roles;
